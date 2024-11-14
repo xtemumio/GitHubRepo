@@ -20,7 +20,6 @@
             android:theme="@style/Theme.GitHubRepo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -31,6 +30,9 @@
             </intent-filter>
 
         </activity>
+
+        <activity android:name=".MainActivity" />
+
     </application>
 
 </manifest>

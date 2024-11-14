@@ -1,5 +1,6 @@
 import com.example.githubrepo.AccessTokenResponse
 import com.example.githubrepo.Repository
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -15,7 +16,7 @@ interface GitHubAuthService {
         @Field("client_secret") clientSecret: String,
         @Field("code") code: String,
         @Field("redirect_uri") redirectUri: String
-    ): Call<AccessTokenResponse>
+    ): Call<ResponseBody>
 
     @GET("user/repos")
     fun getRepositories(

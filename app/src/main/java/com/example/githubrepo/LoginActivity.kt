@@ -6,12 +6,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginActivity : AppCompatActivity() {
 
@@ -24,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        Log.d("LoginActivity", "onCreate: Checking if user is logged in")
         checkIfLoggedIn()
 
         val loginButton: Button = findViewById(R.id.login_button)
@@ -36,19 +38,19 @@ class LoginActivity : AppCompatActivity() {
     private fun checkIfLoggedIn() {
         val sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         val accessToken = sharedPreferences.getString("ACCESS_TOKEN", null)
+        Log.d("LoginActivity", "checkIfLoggedIn: accessToken = $accessToken")
 
         if (accessToken != null) {
-            // Se il token è presente, bypassa il login
-            Log.d("LoginActivity", "User is already logged in with token: $accessToken")
-            navigateToMainActivity()
+            Log.d("LoginActivity", "User is already logged in, navigating to MainActivity")
+            navigateToMainActivity(accessToken)
         } else {
-            // Altrimenti, continua con il login
-            Log.d("LoginActivity", "User is not logged in")
+            Log.d("LoginActivity", "User is not logged in, staying on LoginActivity")
         }
     }
 
     private fun startGitHubLogin() {
         val authUrl = "$AUTH_URL?client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI"
+        Log.d("LoginActivity", "startGitHubLogin: authUrl = $authUrl")
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl))
         startActivity(intent)
     }
@@ -58,13 +60,14 @@ class LoginActivity : AppCompatActivity() {
         Log.d("LoginActivity", "onResume: Checking for redirect URI")
         val uri: Uri? = intent?.data
         if (uri != null && uri.toString().startsWith(REDIRECT_URI)) {
-            Log.d("LoginActivity", "onResume: Redirect URI found")
+            Log.d("LoginActivity", "onResume: Redirect URI found: $uri")
             val code = uri.getQueryParameter("code")
             if (code != null) {
                 Log.d("LoginActivity", "Authorization code received: $code")
                 exchangeCodeForToken(code)
             } else {
                 Log.e("LoginActivity", "Authorization code is null")
+                Toast.makeText(this, "Failed to receive authorization code", Toast.LENGTH_SHORT).show()
             }
             intent?.data = null
         } else {
@@ -73,12 +76,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun exchangeCodeForToken(code: String) {
-        Log.d("LoginActivity", "Exchanging code for access token")
+        Log.d("LoginActivity", "Exchanging code for access token with code: $code")
 
         val retrofit = Retrofit.Builder()
             .baseUrl("https://github.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+            .build() // Rimuoviamo GsonConverterFactory, poiché ora trattiamo la risposta come testo
 
         val service = retrofit.create(GitHubAuthService::class.java)
         val call = service.getAccessToken(
@@ -88,14 +90,23 @@ class LoginActivity : AppCompatActivity() {
             redirectUri = REDIRECT_URI
         )
 
-        call.enqueue(object : Callback<AccessTokenResponse> {
-            override fun onResponse(call: Call<AccessTokenResponse>, response: Response<AccessTokenResponse>) {
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    val accessToken = response.body()?.accessToken
+                    val responseBody = response.body()?.string() ?: ""
+                    Log.d("LoginActivity", "Raw access token response: $responseBody")
+
+                    // Estrarre il token dalla risposta url encoded
+                    val tokenParams = responseBody.split("&").associate {
+                        val (key, value) = it.split("=")
+                        key to value
+                    }
+                    val accessToken = tokenParams["access_token"]
+
                     if (accessToken != null) {
                         Log.d("LoginActivity", "Access token received: $accessToken")
                         saveAccessToken(accessToken)
-                        navigateToMainActivity()
+                        navigateToMainActivity(accessToken)
                     } else {
                         Log.e("LoginActivity", "Access token is null in response")
                     }
@@ -104,25 +115,30 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<AccessTokenResponse>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("LoginActivity", "Error during token exchange", t)
-                // Gestione degli errori come in precedenza
             }
         })
     }
 
     private fun saveAccessToken(accessToken: String) {
-        Log.d("LoginActivity", "Saving access token to SharedPreferences")
+        Log.d("LoginActivity", "Saving access token to SharedPreferences: $accessToken")
         val sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString("ACCESS_TOKEN", accessToken)
             apply()
         }
+
+        val savedToken = sharedPreferences.getString("ACCESS_TOKEN", null)
+        Log.d("LoginActivity", "Saved token is: $savedToken")
     }
 
-    private fun navigateToMainActivity() {
-        Log.d("LoginActivity", "Navigating to MainActivity")
-        startActivity(Intent(this, MainActivity::class.java))
+    private fun navigateToMainActivity(accessToken: String) {
+        Log.d("LoginActivity", "Navigating to MainActivity with token")
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("ACCESS_TOKEN", accessToken)
+        }
+        startActivity(intent)
         finish()
     }
 }

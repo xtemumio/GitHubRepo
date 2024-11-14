@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    android:background="@drawable/button_background"
+    android:layout_gravity="fill"
+    android:padding="16dp"
+    android:layout_columnWeight="1">
+
+    <TextView
+        android:id="@+id/repoTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Repository Title"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/repoDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Description of the repository"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/repoLanguage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Language: Kotlin"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/repoStars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stars: 123"
+        android:textSize="12sp" />
+</LinearLayout>
