@@ -1,0 +1,13 @@
+<!-- res/drawable/button_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#1E88E5"
+        android:endColor="#1976D2"
+        android:angle="90" />
+    <corners android:radius="24dp" />
+    <padding
+        android:left="16dp"
+        android:right="16dp"
+        android:top="8dp"
+        android:bottom="8dp" />
+</shape>
