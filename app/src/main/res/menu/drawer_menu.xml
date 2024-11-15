@@ -1,10 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/home"
+    android:title="Home" />
+
+    <item
+        android:id="@+id/menu_profile"
+        android:icon="@drawable/user_menu"
+    android:title="Profilo Utente" />
+
+    <item
         android:id="@+id/menu_logout"
         android:icon="@drawable/logout"
         android:title="Logout" />
-    <item
-        android:id="@+id/menu_github"
-        android:icon="@drawable/icon"
-        android:title="Apri GitHub" />
 </menu>

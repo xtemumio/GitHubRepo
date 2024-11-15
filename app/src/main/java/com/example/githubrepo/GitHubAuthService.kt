@@ -1,5 +1,5 @@
-import com.example.githubrepo.AccessTokenResponse
 import com.example.githubrepo.Repository
+import com.google.firebase.firestore.auth.User
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Field
@@ -22,4 +22,6 @@ interface GitHubAuthService {
     fun getRepositories(
         @Header("Authorization") accessToken: String
     ): Call<List<Repository>>
-}
+
+    @GET("user")
+    fun getUserProfile(@Header("Authorization") authToken: String): Call<com.example.githubrepo.User>}
