@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.GridLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +18,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-    // GridLayout per visualizzare le card dei repository
     private lateinit var repositoryGrid: GridLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,22 +25,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d("MainActivity", "MainActivity started")
 
-        // Inizializzazione della GridLayout per i repository
         repositoryGrid = findViewById(R.id.repositoryGrid)
         Log.d("MainActivity", "repositoryGrid initialized")
 
-        // Recupera il token di accesso dall'intent
         val accessToken = intent.getStringExtra("ACCESS_TOKEN")
         if (accessToken != null) {
             Log.d("MainActivity", "Access token received: $accessToken")
-            fetchRepositories(accessToken) // Effettua la richiesta per ottenere i repository
+            fetchRepositories(accessToken)
         } else {
             Log.e("MainActivity", "Error: Access token not received")
             Toast.makeText(this, "Errore: Token di accesso non trovato", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Metodo per recuperare i repository tramite Retrofit
     private fun fetchRepositories(accessToken: String) {
         Log.d("MainActivity", "fetchRepositories: Initializing Retrofit service")
 
@@ -65,9 +63,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     Log.e(
                         "MainActivity",
-                        "onResponse: Error fetching repositories - ${
-                            response.errorBody()?.string()
-                        }"
+                        "onResponse: Error fetching repositories - ${response.errorBody()?.string()}"
                     )
                     Toast.makeText(
                         this@MainActivity,
@@ -85,35 +81,61 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Metodo per visualizzare i repository come card all'interno della GridLayout
     private fun displayRepositories(repositories: List<Repository>) {
         Log.d("MainActivity", "displayRepositories: Displaying repositories in GridLayout")
-        repositoryGrid.removeAllViews() // Pulisce le viste esistenti nella griglia
+        repositoryGrid.removeAllViews()
 
         val inflater = LayoutInflater.from(this)
 
         for (repo in repositories) {
             Log.d("MainActivity", "displayRepositories: Adding repository ${repo.name} to grid")
 
-            // Inflate della card layout per il repository
             val repoView = inflater.inflate(R.layout.repository_card, repositoryGrid, false)
 
-            // Riferimenti agli elementi della card
             val titleView = repoView.findViewById<TextView>(R.id.repoTitle)
             val descriptionView = repoView.findViewById<TextView>(R.id.repoDescription)
             val languageView = repoView.findViewById<TextView>(R.id.repoLanguage)
-            val starsView = repoView.findViewById<TextView>(R.id.repoStars)
+            val starsContainer = repoView.findViewById<LinearLayout>(R.id.starsContainer)
 
-            // Imposta i dati del repository nella card
             titleView.text = repo.name
             descriptionView.text = repo.description ?: "No description"
             languageView.text = "Language: ${repo.language ?: "N/A"}"
-            starsView.text = "Stars: ${repo.stars}"
 
-            // Aggiunge la card alla griglia
+            // Visualizza le stelle
+            displayStars(repo.stars, starsContainer)
+
             repositoryGrid.addView(repoView)
         }
 
         Log.d("MainActivity", "displayRepositories: Finished displaying repositories")
+    }
+
+    // Funzione per visualizzare le stelle come immagini
+    private fun displayStars(starCount: Int, starsContainer: LinearLayout) {
+        val maxStars = 5
+        starsContainer.removeAllViews()
+
+        // Setta la dimensione per le stelle
+        val starSize = resources.getDimensionPixelSize(R.dimen.star_size)
+
+        // Aggiungi stelle gialle per il numero di stelle del repository
+        for (i in 1..starCount.coerceAtMost(maxStars)) {
+            val starImageView = ImageView(this)
+            starImageView.setImageResource(R.drawable.star)
+            val params = LinearLayout.LayoutParams(starSize, starSize)
+            params.marginEnd = 4 // Margine tra le stelle
+            starImageView.layoutParams = params
+            starsContainer.addView(starImageView)
+        }
+
+        // Aggiungi stelle grigie per il resto fino a 5 stelle
+        for (i in (starCount + 1)..maxStars) {
+            val starImageView = ImageView(this)
+            starImageView.setImageResource(R.drawable.star_grey)
+            val params = LinearLayout.LayoutParams(starSize, starSize)
+            params.marginEnd = 4
+            starImageView.layoutParams = params
+            starsContainer.addView(starImageView)
+        }
     }
 }
