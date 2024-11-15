@@ -1,6 +1,8 @@
 package com.example.githubrepo
 
 import GitHubAuthService
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +12,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -19,6 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class MainActivity : AppCompatActivity() {
 
     private lateinit var repositoryGrid: GridLayout
+    private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +33,29 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "MainActivity started")
 
         repositoryGrid = findViewById(R.id.repositoryGrid)
-        Log.d("MainActivity", "repositoryGrid initialized")
+        drawerLayout = findViewById(R.id.drawerLayout)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        toolbar.setNavigationIcon(R.drawable.menu_burger) // Assicurati di avere l'icona
+        toolbar.setNavigationOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        val navigationView: NavigationView = findViewById(R.id.navigationView)
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_logout -> {
+                    handleLogout()
+                    true
+                }
+                R.id.menu_github -> {
+                    openGitHub()
+                    true
+                }
+                else -> false
+            }
+        }
 
         val accessToken = intent.getStringExtra("ACCESS_TOKEN")
         if (accessToken != null) {
@@ -36,6 +65,23 @@ class MainActivity : AppCompatActivity() {
             Log.e("MainActivity", "Error: Access token not received")
             Toast.makeText(this, "Errore: Token di accesso non trovato", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun handleLogout() {
+        // Rimuovi il token di accesso e torna alla schermata di login
+        getSharedPreferences("MyAppPrefs", MODE_PRIVATE).edit().remove("ACCESS_TOKEN").apply()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
+        Toast.makeText(this, "Logout effettuato", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun openGitHub() {
+        // Apri il sito GitHub dell'utente
+        val url = "https://github.com/your-username?tab=repositories" // Sostituisci con l'username
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
     }
 
     private fun fetchRepositories(accessToken: String) {
@@ -110,25 +156,20 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "displayRepositories: Finished displaying repositories")
     }
 
-    // Funzione per visualizzare le stelle come immagini
     private fun displayStars(starCount: Int, starsContainer: LinearLayout) {
         val maxStars = 5
         starsContainer.removeAllViews()
-
-        // Setta la dimensione per le stelle
         val starSize = resources.getDimensionPixelSize(R.dimen.star_size)
 
-        // Aggiungi stelle gialle per il numero di stelle del repository
         for (i in 1..starCount.coerceAtMost(maxStars)) {
             val starImageView = ImageView(this)
             starImageView.setImageResource(R.drawable.star)
             val params = LinearLayout.LayoutParams(starSize, starSize)
-            params.marginEnd = 4 // Margine tra le stelle
+            params.marginEnd = 4
             starImageView.layoutParams = params
             starsContainer.addView(starImageView)
         }
 
-        // Aggiungi stelle grigie per il resto fino a 5 stelle
         for (i in (starCount + 1)..maxStars) {
             val starImageView = ImageView(this)
             starImageView.setImageResource(R.drawable.star_grey)
