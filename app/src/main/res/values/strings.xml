@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">GitHubRepo</string>
+    <string name="app_name">GitInsight</string>
+    <string name="info_button_description">InfoButton</string>
+    <string name="open">Apri menu</string>
+    <string name="close">Chiudi menu</string>
+    <string name="open_drawer">Apri menu</string>
+    <string name="close_drawer">Chiudi menu</string>
+    <string name="user_profile_image">Immagine del profilo utente</string>
+    <string name="repo_owner_image">Immagine del proprietario del repository</string>
 </resources>

@@ -1,0 +1,37 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/menuBackground">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/navProfileImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.LargeComponent"
+        android:contentDescription="@string/user_profile_image"
+        android:src="@drawable/user_menu" />
+
+    <TextView
+        android:id="@+id/navUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Name"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/navUserEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="email@example.com"
+        android:textSize="14sp"
+        android:textColor="@android:color/white"
+        android:layout_gravity="center_horizontal" />
+</LinearLayout>
