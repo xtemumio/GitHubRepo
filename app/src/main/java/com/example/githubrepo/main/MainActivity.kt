@@ -1,5 +1,16 @@
+/**
+ * MainActivity
+ *
+ * Questa classe rappresenta la schermata principale dell'app. Gestisce:
+ * - La visualizzazione dei repository dell'utente in un RecyclerView.
+ * - Il recupero dei dati dell'utente (nome, avatar, email) per il menu laterale.
+ * - La gestione della navigazione tramite il menu laterale.
+ * - Il logout dell'utente.
+ */
+
 package com.example.githubrepo.main
 
+import Repository
 import com.example.githubrepo.network.GitHubAuthService
 import android.content.Intent
 import android.os.Bundle
@@ -17,7 +28,6 @@ import com.example.githubrepo.R
 import com.example.githubrepo.login.LoginActivity
 import com.example.githubrepo.models.User
 import com.example.githubrepo.profile.UserProfileActivity
-import com.example.githubrepo.repository.Repository
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.imageview.ShapeableImageView
 import com.squareup.picasso.Picasso
@@ -39,22 +49,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Inizializzazione del menu laterale (DrawerLayout)
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
 
+        // Configurazione della toolbar con il menu laterale
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar,
+        val toggle = ActionBarDrawerToggle(
+            this,
+            drawerLayout,
+            toolbar,
             R.string.open_drawer,
             R.string.close_drawer
         )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        // Inizializza RecyclerView
+        // Inizializza il RecyclerView per mostrare i repository
         recyclerView = findViewById(R.id.repositoryRecyclerView)
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        recyclerView.layoutManager = GridLayoutManager(this, 2) // Layout griglia a 2 colonne
         adapter = RepositoryAdapter()
         recyclerView.adapter = adapter
 
@@ -68,6 +83,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    /**
+     * Recupera i repository dell'utente da GitHub e li visualizza nel RecyclerView.
+     * @param accessToken Il token di accesso per l'autenticazione con l'API di GitHub.
+     */
     private fun fetchRepositories(accessToken: String) {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.github.com/")
@@ -78,12 +97,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val call = service.getRepositories("Bearer $accessToken")
 
         call.enqueue(object : Callback<List<Repository>> {
-            override fun onResponse(call: Call<List<Repository>>, response: Response<List<Repository>>) {
+            override fun onResponse(
+                call: Call<List<Repository>>,
+                response: Response<List<Repository>>
+            ) {
                 if (response.isSuccessful) {
                     val repositories = response.body() ?: emptyList()
-                    adapter.submitList(repositories)
+                    adapter.submitList(repositories) // Aggiorna il RecyclerView con i dati ricevuti
                 } else {
-                    Toast.makeText(this@MainActivity, "Errore nel recupero dei repository", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Errore nel recupero dei repository",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
@@ -93,6 +119,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         })
     }
 
+    /**
+     * Recupera il profilo dell'utente da GitHub e aggiorna il menu laterale.
+     * @param accessToken Il token di accesso per l'autenticazione con l'API di GitHub.
+     */
     private fun fetchUserProfile(accessToken: String) {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.github.com/")
@@ -107,7 +137,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (response.isSuccessful) {
                     val user = response.body()
                     user?.let {
-                        updateNavigationHeader(it)
+                        updateNavigationHeader(it) // Aggiorna l'header del menu laterale
                     }
                 } else {
                     Log.e("MainActivity", "Errore nel recupero del profilo utente")
@@ -120,25 +150,34 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         })
     }
 
+    /**
+     * Aggiorna l'header del menu laterale con i dati dell'utente.
+     * @param user Oggetto User con le informazioni dell'utente.
+     */
     private fun updateNavigationHeader(user: User) {
         val headerView = navigationView.getHeaderView(0)
         val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
         val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
         val navProfileImage = headerView.findViewById<ShapeableImageView>(R.id.navProfileImage)
 
-        // Mostra solo il nome o l'email, ma non ripetere lo stesso testo
+        // Mostra il nome dell'utente o il login come fallback
         navUserName.text = user.name ?: user.login ?: "Nome non disponibile"
+        // Mostra l'email solo se disponibile, altrimenti nasconde il TextView
         navUserEmail.text = user.email ?: run {
-            navUserEmail.visibility = View.GONE // Nascondi la TextView se non c'è l'email
+            navUserEmail.visibility = View.GONE
             ""
         }
 
+        // Carica l'immagine del profilo usando Picasso
         Picasso.get().load(user.avatarUrl)
             .placeholder(R.drawable.user_menu)
             .error(R.drawable.user_menu)
             .into(navProfileImage)
     }
 
+    /**
+     * Effettua il logout dell'utente e naviga verso la LoginActivity.
+     */
     private fun handleLogout() {
         getSharedPreferences("MyAppPrefs", MODE_PRIVATE).edit().remove("ACCESS_TOKEN").apply()
         val intent = Intent(this, LoginActivity::class.java)
@@ -148,6 +187,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Toast.makeText(this, "Logout effettuato", Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * Gestisce gli eventi del menu laterale.
+     */
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_home -> drawerLayout.closeDrawer(GravityCompat.START)
@@ -161,6 +203,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    /**
+     * Chiude il menu laterale se aperto; altrimenti gestisce il comportamento del tasto indietro.
+     */
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

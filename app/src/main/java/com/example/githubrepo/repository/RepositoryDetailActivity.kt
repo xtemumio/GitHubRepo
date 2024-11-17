@@ -1,3 +1,11 @@
+/**
+ * RepositoryDetailActivity
+ *
+ * Questa classe rappresenta l'attività di dettaglio del repository.
+ * Mostra informazioni dettagliate su un repository GitHub selezionato, inclusi
+ * il nome, la descrizione, il linguaggio, le stelle, i fork, e il proprietario.
+ * Inoltre, visualizza un grafico dei contributi basato su dati simulati.
+ */
 package com.example.githubrepo.repository
 
 import android.graphics.Color
@@ -62,16 +70,25 @@ class RepositoryDetailActivity : AppCompatActivity() {
         repoOwnerName.text = ownerName ?: "Proprietario non disponibile"
         Picasso.get().load(ownerImageUrl).placeholder(R.drawable.repo_icon).into(repoOwnerImage)
 
+        // Mostra le stelle
         displayStars(stars)
 
+        // Configura il grafico dei contributi
         setupContributionChart()
     }
 
+    /**
+     * Mostra il numero di stelle come icone grafiche.
+     * Le stelle sono visualizzate fino a un massimo di 5.
+     *
+     * @param starCount Numero di stelle da mostrare.
+     */
     private fun displayStars(starCount: Int) {
         val maxStars = 5
         starsContainer.removeAllViews()
         val starSize = resources.getDimensionPixelSize(R.dimen.star_size)
 
+        // Aggiunge le stelle piene
         for (i in 1..starCount.coerceAtMost(maxStars)) {
             val starImageView = ImageView(this)
             starImageView.setImageResource(R.drawable.star)
@@ -81,6 +98,7 @@ class RepositoryDetailActivity : AppCompatActivity() {
             starsContainer.addView(starImageView)
         }
 
+        // Aggiunge le stelle grigie per completare il massimo
         for (i in (starCount + 1)..maxStars) {
             val starImageView = ImageView(this)
             starImageView.setImageResource(R.drawable.star_grey)
@@ -91,6 +109,10 @@ class RepositoryDetailActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Configura il grafico dei contributi.
+     * Utilizza dati simulati per visualizzare un'anteprima del grafico.
+     */
     private fun setupContributionChart() {
         val entries = mutableListOf<Entry>()
         val contributions = listOf(5, 12, 7, 10, 20, 15, 30) // Dati esempio
@@ -108,11 +130,15 @@ class RepositoryDetailActivity : AppCompatActivity() {
         val lineData = LineData(dataSet)
         contributionChart.data = lineData
 
+        // Configura la descrizione del grafico
         contributionChart.description = Description().apply { text = "" }
         contributionChart.setBackgroundColor(Color.TRANSPARENT)
         contributionChart.animateY(1000)
     }
 
+    /**
+     * Gestisce il click sul pulsante "indietro" della Toolbar.
+     */
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true

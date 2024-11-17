@@ -1,3 +1,14 @@
+/**
+ * LoginActivity
+ *
+ * Questa classe gestisce l'autenticazione con GitHub tramite OAuth. Include:
+ * - Verifica se l'utente è già autenticato.
+ * - Avvio del flusso di login tramite il browser.
+ * - Gestione del reindirizzamento OAuth per ottenere il token di accesso.
+ * - Salvataggio del token di accesso nelle SharedPreferences.
+ * - Navigazione alla MainActivity se il login ha successo.
+ */
+
 package com.example.githubrepo.login
 
 import com.example.githubrepo.network.GitHubAuthService
@@ -18,10 +29,10 @@ import retrofit2.Retrofit
 
 class LoginActivity : AppCompatActivity() {
 
-    private val CLIENT_ID = "Ov23litGyvF9SLS12cOe"
-    private val CLIENT_SECRET = "c5ee7df9a526949b28dd6fd147bfec386e39ee10"
-    private val REDIRECT_URI = "myapp://callback"
-    private val AUTH_URL = "https://github.com/login/oauth/authorize"
+    private val CLIENT_ID = "Ov23litGyvF9SLS12cOe" // ID del client GitHub
+    private val CLIENT_SECRET = "c5ee7df9a526949b28dd6fd147bfec386e39ee10" // Secret del client GitHub
+    private val REDIRECT_URI = "myapp://callback" // URI di reindirizzamento definito
+    private val AUTH_URL = "https://github.com/login/oauth/authorize" // URL per autorizzazione
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +48,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Controlla se l'utente è già autenticato, utilizzando SharedPreferences.
+     * Se il token è presente, viene effettuata la navigazione alla MainActivity.
+     */
     private fun checkIfLoggedIn() {
         val sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         val accessToken = sharedPreferences.getString("ACCESS_TOKEN", null)
@@ -50,6 +65,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Avvia il flusso di login tramite GitHub.
+     * Apre il browser per l'autenticazione OAuth.
+     */
     private fun startGitHubLogin() {
         val authUrl = "$AUTH_URL?client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI"
         Log.d("LoginActivity", "startGitHubLogin: authUrl = $authUrl")
@@ -77,12 +96,17 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Scambia il codice di autorizzazione per un token di accesso.
+     * Effettua una chiamata API a GitHub.
+     * @param code Codice di autorizzazione ottenuto da GitHub.
+     */
     private fun exchangeCodeForToken(code: String) {
         Log.d("LoginActivity", "Exchanging code for access token with code: $code")
 
         val retrofit = Retrofit.Builder()
             .baseUrl("https://github.com/")
-            .build() // Rimuoviamo GsonConverterFactory, poiché ora trattiamo la risposta come testo
+            .build() // Nessun GsonConverterFactory perché la risposta è raw text
 
         val service = retrofit.create(GitHubAuthService::class.java)
         val call = service.getAccessToken(
@@ -98,7 +122,7 @@ class LoginActivity : AppCompatActivity() {
                     val responseBody = response.body()?.string() ?: ""
                     Log.d("LoginActivity", "Raw access token response: $responseBody")
 
-                    // Estrarre il token dalla risposta url encoded
+                    // Estrai il token dalla risposta URL-encoded
                     val tokenParams = responseBody.split("&").associate {
                         val (key, value) = it.split("=")
                         key to value
@@ -123,6 +147,10 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Salva il token di accesso nelle SharedPreferences.
+     * @param accessToken Token di accesso ricevuto da GitHub.
+     */
     private fun saveAccessToken(accessToken: String) {
         Log.d("LoginActivity", "Saving access token to SharedPreferences: $accessToken")
         val sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
@@ -135,6 +163,10 @@ class LoginActivity : AppCompatActivity() {
         Log.d("LoginActivity", "Saved token is: $savedToken")
     }
 
+    /**
+     * Naviga alla MainActivity, passando il token di accesso.
+     * @param accessToken Token di accesso ricevuto.
+     */
     private fun navigateToMainActivity(accessToken: String) {
         Log.d("LoginActivity", "Navigating to MainActivity with token")
         val intent = Intent(this, MainActivity::class.java).apply {
