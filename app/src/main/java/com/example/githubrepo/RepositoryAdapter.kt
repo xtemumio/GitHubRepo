@@ -1,9 +1,12 @@
-package com.example.githubrepo// com.example.githubrepo.RepositoryAdapter.kt
+package com.example.githubrepo
+
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -14,7 +17,7 @@ class RepositoryAdapter : ListAdapter<Repository, RepositoryAdapter.RepositoryVi
 ) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RepositoryViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_repository, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.repository_card, parent, false)
         return RepositoryViewHolder(view)
     }
 
@@ -24,23 +27,58 @@ class RepositoryAdapter : ListAdapter<Repository, RepositoryAdapter.RepositoryVi
     }
 
     class RepositoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val title: TextView = itemView.findViewById(R.id.title)
-        private val description: TextView = itemView.findViewById(R.id.description)
-        private val language: TextView = itemView.findViewById(R.id.language)
-        private val stars: TextView = itemView.findViewById(R.id.stars)
-        private val infoButton: ImageButton = itemView.findViewById(R.id.info_button)
+        private val title: TextView = itemView.findViewById(R.id.repoTitle)
+        private val description: TextView = itemView.findViewById(R.id.repoDescription)
+        private val language: TextView = itemView.findViewById(R.id.repoLanguage)
+        private val starsContainer: LinearLayout = itemView.findViewById(R.id.starsContainer)
+        private val infoButton: ImageButton = itemView.findViewById(R.id.infoButton)
 
         fun bind(repository: Repository) {
             title.text = repository.name
-            description.text = repository.description
-            language.text = repository.language
-            stars.text = repository.stars.toString()
+            description.text = repository.description ?: "No description"
+            language.text = repository.language ?: "N/A"
 
+            // Mostra le stelle
+            displayStars(repository.stars, starsContainer)
+
+            // Listener per il pulsante info
             infoButton.setOnClickListener {
                 val context = itemView.context
-                val intent = Intent(context, RepositoryDetailActivity::class.java)
-                intent.putExtra("REPOSITORY_ID", repository.id)
+                val intent = Intent(context, RepositoryDetailActivity::class.java).apply {
+                    putExtra("name", repository.name)
+                    putExtra("description", repository.description)
+                    putExtra("language", repository.language)
+                    putExtra("stars", repository.stars)
+                    putExtra("forks", repository.forks)
+                    putExtra("ownerImageUrl", repository.ownerImageUrl)
+                    putExtra("ownerName", repository.ownerName)
+                }
                 context.startActivity(intent)
+            }
+        }
+
+        // Funzione per visualizzare le stelle
+        private fun displayStars(starCount: Int, starsContainer: LinearLayout) {
+            val maxStars = 5
+            starsContainer.removeAllViews()
+            val starSize = itemView.resources.getDimensionPixelSize(R.dimen.star_size)
+
+            for (i in 1..starCount.coerceAtMost(maxStars)) {
+                val starImageView = ImageView(itemView.context)
+                starImageView.setImageResource(R.drawable.star)
+                val params = LinearLayout.LayoutParams(starSize, starSize)
+                params.marginEnd = 4
+                starImageView.layoutParams = params
+                starsContainer.addView(starImageView)
+            }
+
+            for (i in (starCount + 1)..maxStars) {
+                val starImageView = ImageView(itemView.context)
+                starImageView.setImageResource(R.drawable.star_grey)
+                val params = LinearLayout.LayoutParams(starSize, starSize)
+                params.marginEnd = 4
+                starImageView.layoutParams = params
+                starsContainer.addView(starImageView)
             }
         }
     }

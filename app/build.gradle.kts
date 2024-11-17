@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.browser:browser:1.8.0")
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
     implementation (libs.okhttp)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.recyclerview)

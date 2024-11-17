@@ -6,4 +6,5 @@
     <string name="open_drawer">Apri menu</string>
     <string name="close_drawer">Chiudi menu</string>
     <string name="user_profile_image">Immagine del profilo utente</string>
+    <string name="repo_owner_image">Immagine del proprietario del repository</string>
 </resources>

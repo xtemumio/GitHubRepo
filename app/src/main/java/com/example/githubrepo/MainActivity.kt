@@ -4,9 +4,7 @@ import GitHubAuthService
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.MenuItem
-import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -14,7 +12,10 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
+import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,15 +24,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var repositoryGrid: GridLayout
     private lateinit var drawerLayout: androidx.drawerlayout.widget.DrawerLayout
     private lateinit var navigationView: NavigationView
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: RepositoryAdapter
     private var accessToken: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d("MainActivity", "MainActivity started")
 
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
@@ -43,21 +44,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        repositoryGrid = findViewById(R.id.repositoryGrid)
-        Log.d("MainActivity", "repositoryGrid initialized")
+        // Inizializza RecyclerView
+        recyclerView = findViewById(R.id.repositoryRecyclerView)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        adapter = RepositoryAdapter()
+        recyclerView.adapter = adapter
 
+        // Recupera il token di accesso
         accessToken = intent.getStringExtra("ACCESS_TOKEN")
         if (accessToken != null) {
-            Log.d("MainActivity", "Access token received: $accessToken")
             fetchRepositories(accessToken!!)
+            fetchUserProfile(accessToken!!)
         } else {
-            Log.e("MainActivity", "Error: Access token not received")
             Toast.makeText(this, "Errore: Token di accesso non trovato", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun fetchRepositories(accessToken: String) {
-        Log.d("MainActivity", "fetchRepositories: Initializing Retrofit service")
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.github.com/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -70,8 +73,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             override fun onResponse(call: Call<List<Repository>>, response: Response<List<Repository>>) {
                 if (response.isSuccessful) {
                     val repositories = response.body() ?: emptyList()
-                    Log.d("MainActivity", "Fetched ${repositories.size} repositories")
-                    displayRepositories(repositories)
+                    adapter.submitList(repositories)
                 } else {
                     Toast.makeText(this@MainActivity, "Errore nel recupero dei repository", Toast.LENGTH_SHORT).show()
                 }
@@ -83,23 +85,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         })
     }
 
-    private fun displayRepositories(repositories: List<Repository>) {
-        repositoryGrid.removeAllViews()
-        val inflater = LayoutInflater.from(this)
+    private fun fetchUserProfile(accessToken: String) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.github.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-        for (repo in repositories) {
-            val repoView = inflater.inflate(R.layout.repository_card, repositoryGrid, false)
-            val titleView = repoView.findViewById<TextView>(R.id.repoTitle)
-            val descriptionView = repoView.findViewById<TextView>(R.id.repoDescription)
-            val languageView = repoView.findViewById<TextView>(R.id.repoLanguage)
-            val starsContainer = repoView.findViewById<LinearLayout>(R.id.starsContainer)
+        val service = retrofit.create(GitHubAuthService::class.java)
+        val call = service.getUserProfile("Bearer $accessToken")
 
-            titleView.text = repo.name
-            descriptionView.text = repo.description ?: "No description"
-            languageView.text = "Language: ${repo.language ?: "N/A"}"
-            displayStars(repo.stars, starsContainer)
-            repositoryGrid.addView(repoView)
-        }
+        call.enqueue(object : Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                if (response.isSuccessful) {
+                    val user = response.body()
+                    user?.let {
+                        updateNavigationHeader(it)
+                    }
+                } else {
+                    Log.e("MainActivity", "Errore nel recupero del profilo utente")
+                }
+            }
+
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                Log.e("MainActivity", "Errore di connessione", t)
+            }
+        })
+    }
+
+    private fun updateNavigationHeader(user: User) {
+        val headerView = navigationView.getHeaderView(0)
+        val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
+        val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
+        val navProfileImage = headerView.findViewById<ImageView>(R.id.navProfileImage)
+
+        navUserName.text = user.name
+        navUserEmail.text = user.email ?: "Email non disponibile"
+        Picasso.get().load(user.avatarUrl).placeholder(R.drawable.user_menu).into(navProfileImage)
     }
 
     private fun displayStars(starCount: Int, starsContainer: LinearLayout) {

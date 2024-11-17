@@ -19,31 +19,24 @@
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
-        <!-- Layout principale con ScrollView e GridLayout -->
-        <ScrollView
+        <!-- RecyclerView per mostrare i repository -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/repositoryRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/toolbar">
-
-            <GridLayout
-                android:id="@+id/repositoryGrid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:padding="8dp"
-                android:layout_marginTop="135dp"
-                android:layout_gravity="center" />
-        </ScrollView>
-
+            android:layout_below="@id/toolbar"
+            android:padding="8dp"
+            android:clipToPadding="false" />
     </RelativeLayout>
 
+    <!-- NavigationView per il menu laterale -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        android:background="#808080"
+        android:background="@color/menuBackground"
+        app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_menu" />
-
 </androidx.drawerlayout.widget.DrawerLayout>

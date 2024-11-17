@@ -7,6 +7,7 @@ data class User(
     val bio: String?,
     val company: String?,
     val location: String?,
+    val email : String?,
     @SerializedName("public_repos") val publicRepos: Int,
     @SerializedName("avatar_url") val avatarUrl: String
 )

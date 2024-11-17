@@ -31,6 +31,7 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".UserProfileActivity" />
+        <activity android:name=".RepositoryDetailActivity" />
     </application>
 
 </manifest>
