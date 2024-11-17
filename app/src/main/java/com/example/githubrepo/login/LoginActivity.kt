@@ -1,6 +1,6 @@
-package com.example.githubrepo
+package com.example.githubrepo.login
 
-import GitHubAuthService
+import com.example.githubrepo.network.GitHubAuthService
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -8,6 +8,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.githubrepo.main.MainActivity
+import com.example.githubrepo.R
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback

@@ -1,4 +1,4 @@
-package com.example.githubrepo
+package com.example.githubrepo.repository
 
 data class Repository(
     val id: Int,

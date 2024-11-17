@@ -1,4 +1,4 @@
-package com.example.githubrepo
+package com.example.githubrepo.models
 
 import com.google.gson.annotations.SerializedName
 

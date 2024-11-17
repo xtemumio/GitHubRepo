@@ -1,6 +1,6 @@
-package com.example.githubrepo
+package com.example.githubrepo.profile
 
-import GitHubAuthService
+import com.example.githubrepo.network.GitHubAuthService
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -11,7 +11,11 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import com.example.githubrepo.R
+import com.example.githubrepo.models.User
+import com.example.githubrepo.login.LoginActivity
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.imageview.ShapeableImageView
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
@@ -85,6 +89,7 @@ class UserProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItem
                 if (response.isSuccessful) {
                     val user = response.body()
                     if (user != null) {
+                        updateNavigationHeader(user)
                         updateUI(user)
                     }
                 } else {
@@ -121,6 +126,25 @@ class UserProfileActivity : AppCompatActivity(), NavigationView.OnNavigationItem
             .placeholder(R.drawable.user_menu)
             .error(R.drawable.user_menu)
             .into(profileImage)
+    }
+
+    private fun updateNavigationHeader(user: User) {
+        val headerView = navigationView.getHeaderView(0)
+        val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
+        val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
+        val navProfileImage = headerView.findViewById<ShapeableImageView>(R.id.navProfileImage)
+
+        // Mostra solo il nome o l'email, ma non ripetere lo stesso testo
+        navUserName.text = user.name ?: user.login ?: "Nome non disponibile"
+        navUserEmail.text = user.email ?: run {
+            navUserEmail.visibility = View.GONE
+            ""
+        }
+
+        Picasso.get().load(user.avatarUrl)
+            .placeholder(R.drawable.user_menu)
+            .error(R.drawable.user_menu)
+            .into(navProfileImage)
     }
 
     private fun handleLogout() {

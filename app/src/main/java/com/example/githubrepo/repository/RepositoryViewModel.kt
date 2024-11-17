@@ -1,8 +1,7 @@
-package com.example.githubrepo
+package com.example.githubrepo.repository
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import com.example.githubrepo.R
 
 class RepositoryViewModel : ViewModel() {
 

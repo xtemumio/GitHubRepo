@@ -14,7 +14,7 @@
         android:theme="@style/Theme.GitHubRepo"
         tools:targetApi="31">
         <activity
-            android:name=".LoginActivity"
+            android:name=".login.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.GitHubRepo">
             <intent-filter>
@@ -29,9 +29,9 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".UserProfileActivity" />
-        <activity android:name=".RepositoryDetailActivity" />
+        <activity android:name=".main.MainActivity" />
+        <activity android:name=".profile.UserProfileActivity" />
+        <activity android:name=".repository.RepositoryDetailActivity" />
     </application>
 
 </manifest>

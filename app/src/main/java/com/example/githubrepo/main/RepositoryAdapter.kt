@@ -1,4 +1,4 @@
-package com.example.githubrepo
+package com.example.githubrepo.main
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -11,6 +11,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.githubrepo.R
+import com.example.githubrepo.repository.Repository
+import com.example.githubrepo.repository.RepositoryDetailActivity
 
 class RepositoryAdapter : ListAdapter<Repository, RepositoryAdapter.RepositoryViewHolder>(
     DiffCallback()

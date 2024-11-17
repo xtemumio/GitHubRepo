@@ -1,12 +1,11 @@
-package com.example.githubrepo
+package com.example.githubrepo.main
 
-import GitHubAuthService
+import com.example.githubrepo.network.GitHubAuthService
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.LinearLayout
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -14,7 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.githubrepo.R
+import com.example.githubrepo.login.LoginActivity
+import com.example.githubrepo.models.User
+import com.example.githubrepo.profile.UserProfileActivity
+import com.example.githubrepo.repository.Repository
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.imageview.ShapeableImageView
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
@@ -40,7 +45,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer)
+        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar,
+            R.string.open_drawer,
+            R.string.close_drawer
+        )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
@@ -116,35 +124,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val headerView = navigationView.getHeaderView(0)
         val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
         val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
-        val navProfileImage = headerView.findViewById<ImageView>(R.id.navProfileImage)
+        val navProfileImage = headerView.findViewById<ShapeableImageView>(R.id.navProfileImage)
 
-        navUserName.text = user.name
-        navUserEmail.text = user.email ?: "Email non disponibile"
-        Picasso.get().load(user.avatarUrl).placeholder(R.drawable.user_menu).into(navProfileImage)
-    }
-
-    private fun displayStars(starCount: Int, starsContainer: LinearLayout) {
-        val maxStars = 5
-        starsContainer.removeAllViews()
-        val starSize = resources.getDimensionPixelSize(R.dimen.star_size)
-
-        for (i in 1..starCount.coerceAtMost(maxStars)) {
-            val starImageView = ImageView(this)
-            starImageView.setImageResource(R.drawable.star)
-            val params = LinearLayout.LayoutParams(starSize, starSize)
-            params.marginEnd = 4
-            starImageView.layoutParams = params
-            starsContainer.addView(starImageView)
+        // Mostra solo il nome o l'email, ma non ripetere lo stesso testo
+        navUserName.text = user.name ?: user.login ?: "Nome non disponibile"
+        navUserEmail.text = user.email ?: run {
+            navUserEmail.visibility = View.GONE // Nascondi la TextView se non c'è l'email
+            ""
         }
 
-        for (i in (starCount + 1)..maxStars) {
-            val starImageView = ImageView(this)
-            starImageView.setImageResource(R.drawable.star_grey)
-            val params = LinearLayout.LayoutParams(starSize, starSize)
-            params.marginEnd = 4
-            starImageView.layoutParams = params
-            starsContainer.addView(starImageView)
-        }
+        Picasso.get().load(user.avatarUrl)
+            .placeholder(R.drawable.user_menu)
+            .error(R.drawable.user_menu)
+            .into(navProfileImage)
     }
 
     private fun handleLogout() {

@@ -1,4 +1,4 @@
-package com.example.githubrepo
+package com.example.githubrepo.repository
 
 import android.graphics.Color
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.githubrepo.R
 import com.squareup.picasso.Picasso
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Description
