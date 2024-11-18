@@ -166,10 +166,3 @@ Per segnalare bug o suggerire miglioramenti, crea un issue o contatta:
 - **Email**: your-email@example.com
 - **GitHub**: [Profilo GitHub](https://github.com/tuo-profilo)
 """
-
-# Saving the content to a README.md file
-file_path = "/mnt/data/README.md"
-with open(file_path, "w") as file:
-    file.write(readme_content)
-
-file_path
