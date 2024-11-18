@@ -163,6 +163,6 @@ Questo progetto è rilasciato sotto la [MIT License](LICENSE).
 
 ## 📧 Contatti
 Per segnalare bug o suggerire miglioramenti, crea un issue o contatta:
-- **Email**: your-email@example.com
-- **GitHub**: [Profilo GitHub](https://github.com/tuo-profilo)
+- **Email**: mpaolo025@gmail.com
+- **GitHub**: [Profilo GitHub](https://github.com/xtemumio)
 """
