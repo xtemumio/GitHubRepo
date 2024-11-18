@@ -1,4 +1,3 @@
-readme_content = """
 # GitHub Repository Explorer
 
 ## 📚 Introduzione
@@ -28,7 +27,7 @@ readme_content = """
 ## 🚀 Installazione
 1. **Clona il repository**:
    ```bash
-   git clone <url-del-repo>
+   git clone <(https://github.com/xtemumio/GitHubRepo)>
    ```
 
 2. **Configura il progetto**:
@@ -165,4 +164,3 @@ Questo progetto è rilasciato sotto la [MIT License](LICENSE).
 Per segnalare bug o suggerire miglioramenti, crea un issue o contatta:
 - **Email**: mpaolo025@gmail.com
 - **GitHub**: [Profilo GitHub](https://github.com/xtemumio)
-"""
